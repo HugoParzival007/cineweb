@@ -5,11 +5,10 @@ export default function Home() {
     <div className="text-center mt-5">
       <h1 className="fw-bold">🎬 Bem-vindo ao CineWeb</h1>
       <p className="fs-4 text-secondary">
-        Sistema de gerenciamento de cinema — filmes, salas e sessões.
+        Sistema administrativo para cadastro de filmes, salas, sessões e venda de ingressos.
       </p>
 
       <div className="d-flex justify-content-center gap-4 mt-4 flex-wrap">
-
         <Link to="/filmes" className="btn btn-dark btn-lg px-4 shadow">
           <i className="bi bi-film"></i> Gerenciar Filmes
         </Link>
@@ -19,9 +18,8 @@ export default function Home() {
         </Link>
 
         <Link to="/sessoes" className="btn btn-dark btn-lg px-4 shadow">
-          <i className="bi bi-ticket"></i> Gerenciar Sessões
+          <i className="bi bi-ticket-perforated"></i> Gerenciar Sessões
         </Link>
-
       </div>
     </div>
   );

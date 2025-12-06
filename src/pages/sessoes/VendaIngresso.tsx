@@ -1,63 +1,56 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { listarSessoes } from "../../services/sessao.service";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { obterSessao } from "../../services/sessao.service";
 import { listarFilmes } from "../../services/filme.service";
 import { listarSalas } from "../../services/sala.service";
 import { criarIngresso } from "../../services/ingresso.service";
+
+import type { Sessao } from "../../models/Sessao";
 import type { Filme } from "../../models/Filme";
 import type { Sala } from "../../models/Sala";
-import type { Sessao } from "../../models/Sessao";
-import { z } from "zod";
-
-// validação Zod
-const vendaSchema = z.object({
-  tipo: z.enum(["inteira", "meia"]).refine((v) => v.length > 0, { 
-    message: "Escolha um tipo de ingresso"
-  })
-});
 
 export default function VendaIngresso() {
-  const { id } = useParams(); // sessaoId
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [sessao, setSessao] = useState<Sessao | null>(null);
   const [filme, setFilme] = useState<Filme | null>(null);
   const [sala, setSala] = useState<Sala | null>(null);
+
   const [tipo, setTipo] = useState("");
   const [erro, setErro] = useState("");
 
   async function carregar() {
-    const s = await listarSessoes();
-    const f = await listarFilmes();
-    const sl = await listarSalas();
+    if (!id) return;
 
-    const sessaoEncontrada = s.data.find((x: Sessao) => x.id === Number(id));
-    setSessao(sessaoEncontrada);
+    const sRes = await obterSessao(id);
+    const s = sRes.data;
+    setSessao(s);
 
-    if (sessaoEncontrada) {
-      setFilme(f.data.find((x: Filme) => x.id === sessaoEncontrada.filmeId));
-      setSala(sl.data.find((x: Sala) => x.id === sessaoEncontrada.salaId));
-    }
+    const filmes = await listarFilmes();
+    setFilme(filmes.data.find((f) => f.id === s.filmeId) ?? null);
+
+    const salas = await listarSalas();
+    setSala(salas.data.find((sa) => sa.id === s.salaId) ?? null);
   }
 
   useEffect(() => {
     carregar();
   }, []);
 
-  async function vender(e: any) {
+  async function vender(e: React.FormEvent) {
     e.preventDefault();
 
-    const validacao = vendaSchema.safeParse({ tipo });
-
-    if (!validacao.success) {
-      setErro(validacao.error.issues[0].message);
+    if (!tipo) {
+      setErro("Escolha o tipo de ingresso");
       return;
     }
 
     const valor = tipo === "inteira" ? 20 : 10;
 
     await criarIngresso({
-      sessaoId: Number(id),
+      sessaoId: id!,
       tipo: tipo as "inteira" | "meia",
       valor,
     });
@@ -65,35 +58,34 @@ export default function VendaIngresso() {
     navigate("/sessoes");
   }
 
-  if (!sessao || !filme || !sala) {
-    return <p>Carregando...</p>;
-  }
+  if (!sessao || !filme || !sala) return <p>Carregando...</p>;
 
   return (
-    <div className="card p-4">
+    <div className="card p-4 shadow">
       <h2>Venda de Ingresso</h2>
 
       <p><strong>Filme:</strong> {filme.titulo}</p>
       <p><strong>Sala:</strong> {sala.numero}</p>
-      <p><strong>Horário:</strong> {new Date(sessao.horario).toLocaleString()}</p>
+      <p><strong>Horário:</strong> {new Date(sessao.horario).toLocaleString("pt-BR")}</p>
 
-      <form onSubmit={vender} className="mt-3">
+      <form onSubmit={vender}>
+        <label className="form-label">Tipo</label>
+        <select
+          className={`form-select ${erro ? "is-invalid" : ""}`}
+          value={tipo}
+          onChange={(e) => {
+            setTipo(e.target.value);
+            setErro("");
+          }}
+        >
+          <option value="">Selecione...</option>
+          <option value="inteira">Inteira — R$ 20</option>
+          <option value="meia">Meia — R$ 10</option>
+        </select>
 
-        <div className="mb-3">
-          <label className="form-label">Tipo de Ingresso</label>
-          <select
-            className="form-select"
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-          >
-            <option value="">Selecione</option>
-            <option value="inteira">Inteira (R$ 20,00)</option>
-            <option value="meia">Meia (R$ 10,00)</option>
-          </select>
-          {erro && <p className="text-danger">{erro}</p>}
-        </div>
+        {erro && <div className="invalid-feedback">{erro}</div>}
 
-        <button className="btn btn-success">Confirmar Venda</button>
+        <button className="btn btn-success mt-3">Confirmar</button>
       </form>
     </div>
   );

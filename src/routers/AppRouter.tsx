@@ -1,15 +1,16 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "../pages/Home/Home";
+import Home from "../pages/home/Home";
 
-import FilmesList from "../pages/Filmes/FilmesList";
-import FilmesForm from "../pages/Filmes/FilmesForm";
+import FilmesList from "../pages/filmes/FilmesList";
+import FilmesForm from "../pages/filmes/FilmesForm";
 
-import SalasList from "../pages/Salas/SalasList";
-import SalasForm from "../pages/Salas/SalasForm";
+import SalasList from "../pages/salas/SalasList";
+import SalasForm from "../pages/salas/SalasForm";
 
-import SessoesList from "../pages/Sessoes/SessoesList";
-import SessoesForm from "../pages/Sessoes/SessoesForm";
-import VendaIngresso from "../pages/Sessoes/VendaIngresso";
+import SessoesList from "../pages/sessoes/SessoesList";
+import SessoesForm from "../pages/sessoes/SessoesForm";
+
+import VendaIngresso from "../pages/sessoes/VendaIngresso";
 
 export default function AppRouter() {
   return (

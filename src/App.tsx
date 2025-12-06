@@ -2,12 +2,16 @@ import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./App.css";
+import AppRouter from "./routers/AppRouter";
 
 export default function App() {
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
-        <Link className="navbar-brand fw-bold fs-3 d-flex align-items-center" to="/">
+        <Link
+          className="navbar-brand fw-bold fs-3 d-flex align-items-center"
+          to="/"
+        >
           🎬 <span className="ms-2">CineWeb</span>
         </Link>
 
@@ -22,7 +26,6 @@ export default function App() {
 
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-
             <li className="nav-item">
               <Link className="nav-link fs-5" to="/filmes">
                 <i className="bi bi-film"></i> Filmes
@@ -40,13 +43,12 @@ export default function App() {
                 <i className="bi bi-ticket-perforated"></i> Sessões
               </Link>
             </li>
-
           </ul>
         </div>
       </nav>
 
       <div className="container mt-4">
-        {/* Aqui o conteúdo das rotas será mostrado */}
+        <AppRouter />
       </div>
     </>
   );

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { listarSalas } from "../../services/sala.service";
 import type { Sala } from "../../models/Sala";
+import { Link } from "react-router-dom";
 
 export default function SalasList() {
   const [salas, setSalas] = useState<Sala[]>([]);
 
   async function carregar() {
-    const r = await listarSalas();
-    setSalas(r.data);
+    const resposta = await listarSalas();
+    setSalas(resposta.data);
   }
 
   useEffect(() => {
@@ -15,17 +16,23 @@ export default function SalasList() {
   }, []);
 
   return (
-    <div>
-      <h2>Salas Cadastradas</h2>
+    <div className="container mt-4">
+      <div className="d-flex justify-content-between">
+        <h2>Salas</h2>
 
-      <table className="table table-striped mt-3">
+        {/* Botão ADICIONADO */}
+        <Link to="/salas/nova" className="btn btn-success">
+          Nova Sala
+        </Link>
+      </div>
+
+      <table className="table mt-3">
         <thead>
           <tr>
             <th>Número</th>
             <th>Capacidade</th>
           </tr>
         </thead>
-
         <tbody>
           {salas.map((s) => (
             <tr key={s.id}>

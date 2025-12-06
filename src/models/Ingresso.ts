@@ -1,6 +1,6 @@
 export interface Ingresso {
-  id?: number;
-  sessaoId: number;
+  id: string;
+  sessaoId: string;   // string
   tipo: "inteira" | "meia";
   valor: number;
 }

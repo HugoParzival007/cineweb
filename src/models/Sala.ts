@@ -1,5 +1,5 @@
 export interface Sala {
-  id?: number;
+  id: string;
   numero: number;
   capacidade: number;
 }

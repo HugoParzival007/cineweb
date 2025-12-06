@@ -4,9 +4,17 @@ import { criarSala } from "../../services/sala.service";
 import { z } from "zod";
 
 const salaSchema = z.object({
-  numero: z.number().positive("O número da sala deve ser maior que 0"),
-  capacidade: z.number().positive("A capacidade deve ser maior que 0"),
+  numero: z
+    .number()
+    .refine((v) => !isNaN(v) && v > 0, "Número deve ser um número maior que 0"),
+
+  capacidade: z
+    .number()
+    .refine((v) => !isNaN(v) && v > 0, "Capacidade deve ser um número maior que 0"),
 });
+
+
+type ErrosForm = Record<string, string>;
 
 export default function SalasForm() {
   const navigate = useNavigate();
@@ -16,13 +24,13 @@ export default function SalasForm() {
     capacidade: "",
   });
 
-  const [erros, setErros] = useState<{ [k: string]: string }>({});
+  const [erros, setErros] = useState<ErrosForm>({});
 
-  function atualizar(e: any) {
+  function atualizar(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  async function salvar(e: any) {
+  async function salvar(e: React.FormEvent) {
     e.preventDefault();
 
     const validacao = salaSchema.safeParse({
@@ -31,43 +39,50 @@ export default function SalasForm() {
     });
 
     if (!validacao.success) {
-      const errosZod: any = {};
-      validacao.error.issues.forEach((err) => {
-        errosZod[err.path[0]] = err.message;
+      const novosErros: ErrosForm = {};
+      validacao.error.issues.forEach((issue) => {
+        const campo = String(issue.path[0]);
+        novosErros[campo] = issue.message;
       });
-
-      setErros(errosZod);
+      setErros(novosErros);
       return;
     }
 
     await criarSala(validacao.data);
-    navigate("/sessoes"); // vai ser útil para parte 4
+    navigate("/salas");
   }
 
   return (
     <div className="card p-4">
       <h2>Cadastrar Sala</h2>
+
       <form onSubmit={salvar}>
         <div className="mb-3">
           <label className="form-label">Número da Sala</label>
           <input
-            name="numero"
             type="number"
-            className="form-control"
+            name="numero"
+            className={`form-control ${erros.numero ? "is-invalid" : ""}`}
             onChange={atualizar}
           />
-          {erros.numero && <p className="text-danger">{erros.numero}</p>}
+          {erros.numero && (
+            <div className="invalid-feedback">{erros.numero}</div>
+          )}
         </div>
 
         <div className="mb-3">
           <label className="form-label">Capacidade Máxima</label>
           <input
-            name="capacidade"
             type="number"
-            className="form-control"
+            name="capacidade"
+            className={`form-control ${
+              erros.capacidade ? "is-invalid" : ""
+            }`}
             onChange={atualizar}
           />
-          {erros.capacidade && <p className="text-danger">{erros.capacidade}</p>}
+          {erros.capacidade && (
+            <div className="invalid-feedback">{erros.capacidade}</div>
+          )}
         </div>
 
         <button className="btn btn-success">Salvar Sala</button>

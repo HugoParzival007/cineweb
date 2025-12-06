@@ -3,16 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { criarFilme } from "../../services/filme.service";
 import { z } from "zod";
 
-// VALIDAÇÃO ZOD
 const filmeSchema = z.object({
   titulo: z.string().min(1, "Título é obrigatório"),
   sinopse: z.string().min(10, "Sinopse deve ter no mínimo 10 caracteres"),
-  classificacao: z.string().min(1, "Informe a classificação"),
-  duracao: z.number().positive("Duração deve ser maior que 0"),
-  genero: z.string().min(1, "Informe o gênero"),
-  dataInicio: z.string().min(1, "Data inicial obrigatória"),
-  dataFim: z.string().min(1, "Data final obrigatória"),
+  classificacao: z.string().min(1, "Classificação é obrigatória"),
+  duracao: z
+    .number()
+    .refine((v) => !isNaN(v) && v > 0, "Duração deve ser um número maior que 0"),
+  genero: z.string().min(1, "Gênero é obrigatório"),
+  dataInicio: z.string().min(1, "Data de início é obrigatória"),
+  dataFim: z.string().min(1, "Data de fim é obrigatória"),
 });
+
+
+type ErrosForm = Record<string, string>;
 
 export default function FilmesForm() {
   const navigate = useNavigate();
@@ -21,19 +25,19 @@ export default function FilmesForm() {
     titulo: "",
     sinopse: "",
     classificacao: "",
-    duracao: 0,
+    duracao: "",
     genero: "",
     dataInicio: "",
     dataFim: "",
   });
 
-  const [erros, setErros] = useState<{ [k: string]: string }>({});
+  const [erros, setErros] = useState<ErrosForm>({});
 
-  function atualizarCampo(e: any) {
+  function atualizar(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  async function salvar(e: any) {
+  async function salvar(e: React.FormEvent) {
     e.preventDefault();
 
     const validacao = filmeSchema.safeParse({
@@ -42,11 +46,12 @@ export default function FilmesForm() {
     });
 
     if (!validacao.success) {
-      const errosZod: any = {};
-      validacao.error.issues.forEach((err) => {
-        errosZod[err.path[0]] = err.message;
+      const novosErros: ErrosForm = {};
+      validacao.error.issues.forEach((issue) => {
+        const campo = String(issue.path[0]);
+        novosErros[campo] = issue.message;
       });
-      setErros(errosZod);
+      setErros(novosErros);
       return;
     }
 
@@ -62,76 +67,96 @@ export default function FilmesForm() {
         <div className="mb-3">
           <label className="form-label">Título</label>
           <input
-            type="text"
             name="titulo"
-            className="form-control"
-            onChange={atualizarCampo}
+            className={`form-control ${erros.titulo ? "is-invalid" : ""}`}
+            onChange={atualizar}
           />
-          {erros.titulo && <p className="text-danger">{erros.titulo}</p>}
+          {erros.titulo && (
+            <div className="invalid-feedback">{erros.titulo}</div>
+          )}
         </div>
 
         <div className="mb-3">
           <label className="form-label">Sinopse</label>
           <textarea
             name="sinopse"
-            className="form-control"
-            onChange={atualizarCampo}
-          ></textarea>
-          {erros.sinopse && <p className="text-danger">{erros.sinopse}</p>}
+            className={`form-control ${erros.sinopse ? "is-invalid" : ""}`}
+            onChange={atualizar}
+            rows={3}
+          />
+          {erros.sinopse && (
+            <div className="invalid-feedback">{erros.sinopse}</div>
+          )}
         </div>
 
         <div className="row">
-          <div className="col-4 mb-3">
+          <div className="col-md-4 mb-3">
             <label className="form-label">Classificação</label>
             <input
               name="classificacao"
-              type="text"
-              className="form-control"
-              onChange={atualizarCampo}
+              className={`form-control ${
+                erros.classificacao ? "is-invalid" : ""
+              }`}
+              onChange={atualizar}
             />
+            {erros.classificacao && (
+              <div className="invalid-feedback">{erros.classificacao}</div>
+            )}
           </div>
 
-          <div className="col-4 mb-3">
+          <div className="col-md-4 mb-3">
             <label className="form-label">Gênero</label>
             <input
               name="genero"
-              type="text"
-              className="form-control"
-              onChange={atualizarCampo}
+              className={`form-control ${erros.genero ? "is-invalid" : ""}`}
+              onChange={atualizar}
             />
+            {erros.genero && (
+              <div className="invalid-feedback">{erros.genero}</div>
+            )}
           </div>
 
-          <div className="col-4 mb-3">
-            <label className="form-label">Duração (min)</label>
+          <div className="col-md-4 mb-3">
+            <label className="form-label">Duração (minutos)</label>
             <input
-              name="duracao"
               type="number"
-              className="form-control"
-              onChange={atualizarCampo}
+              name="duracao"
+              className={`form-control ${erros.duracao ? "is-invalid" : ""}`}
+              onChange={atualizar}
             />
-            {erros.duracao && <p className="text-danger">{erros.duracao}</p>}
+            {erros.duracao && (
+              <div className="invalid-feedback">{erros.duracao}</div>
+            )}
           </div>
         </div>
 
         <div className="row">
-          <div className="col-6 mb-3">
-            <label className="form-label">Data Início</label>
+          <div className="col-md-6 mb-3">
+            <label className="form-label">Data de início</label>
             <input
-              name="dataInicio"
               type="date"
-              className="form-control"
-              onChange={atualizarCampo}
+              name="dataInicio"
+              className={`form-control ${
+                erros.dataInicio ? "is-invalid" : ""
+              }`}
+              onChange={atualizar}
             />
+            {erros.dataInicio && (
+              <div className="invalid-feedback">{erros.dataInicio}</div>
+            )}
           </div>
 
-          <div className="col-6 mb-3">
-            <label className="form-label">Data Fim</label>
+          <div className="col-md-6 mb-3">
+            <label className="form-label">Data de fim</label>
             <input
-              name="dataFim"
               type="date"
-              className="form-control"
-              onChange={atualizarCampo}
+              name="dataFim"
+              className={`form-control ${erros.dataFim ? "is-invalid" : ""}`}
+              onChange={atualizar}
             />
+            {erros.dataFim && (
+              <div className="invalid-feedback">{erros.dataFim}</div>
+            )}
           </div>
         </div>
 
