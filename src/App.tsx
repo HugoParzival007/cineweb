@@ -1,30 +1,52 @@
+import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import AppRouter from "./routers/AppRouter";
+import "./App.css";
 
 export default function App() {
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-        <a className="navbar-brand" href="/">CineWeb</a>
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
+        <Link className="navbar-brand fw-bold fs-3 d-flex align-items-center" to="/">
+          🎬 <span className="ms-2">CineWeb</span>
+        </Link>
 
-        <div className="collapse navbar-collapse">
-          <ul className="navbar-nav me-auto">
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto">
+
             <li className="nav-item">
-              <a className="nav-link" href="/filmes">Filmes</a>
+              <Link className="nav-link fs-5" to="/filmes">
+                <i className="bi bi-film"></i> Filmes
+              </Link>
             </li>
+
             <li className="nav-item">
-              <a className="nav-link" href="/salas">Salas</a>
+              <Link className="nav-link fs-5" to="/salas">
+                <i className="bi bi-door-open"></i> Salas
+              </Link>
             </li>
+
             <li className="nav-item">
-              <a className="nav-link" href="/sessoes">Sessões</a>
+              <Link className="nav-link fs-5" to="/sessoes">
+                <i className="bi bi-ticket-perforated"></i> Sessões
+              </Link>
             </li>
+
           </ul>
         </div>
       </nav>
 
       <div className="container mt-4">
-        <AppRouter />
+        {/* Aqui o conteúdo das rotas será mostrado */}
       </div>
     </>
   );
