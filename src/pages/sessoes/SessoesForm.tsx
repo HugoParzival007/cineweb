@@ -45,8 +45,8 @@ export default function SessoesForm() {
       const resposta = await obterSessao(id);
       const s = resposta.data;
 
-      setFilmeId(s.filmeId);
-      setSalaId(s.salaId);
+      setFilmeId(String(s.filmeId));
+      setSalaId(String(s.salaId));
       setHorario(s.horario);
     }
   }
@@ -94,7 +94,7 @@ export default function SessoesForm() {
           >
             <option value="">Selecione...</option>
             {filmes.map((f) => (
-              <option key={f.id} value={f.id}>
+              <option key={f.id} value={String(f.id)}>
                 {f.titulo}
               </option>
             ))}
@@ -111,7 +111,7 @@ export default function SessoesForm() {
           >
             <option value="">Selecione...</option>
             {salas.map((s) => (
-              <option key={s.id} value={s.id}>
+              <option key={s.id} value={String(s.id)}>
                 Sala {s.numero} — Capacidade {s.capacidade}
               </option>
             ))}

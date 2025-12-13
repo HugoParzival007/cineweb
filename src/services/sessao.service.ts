@@ -3,22 +3,15 @@ import type { Sessao } from "../models/Sessao";
 
 const API_URL = "http://localhost:3000/sessoes";
 
-export function listarSessoes() {
-  return axios.get<Sessao[]>(API_URL);
-}
+export const listarSessoes = () => axios.get<Sessao[]>(API_URL);
 
-export function obterSessao(id: string) {
-  return axios.get<Sessao>(`${API_URL}/${id}`);
-}
+export const obterSessao = (id: string) => axios.get<Sessao>(`${API_URL}/${id}`);
 
-export function criarSessao(sessao: Omit<Sessao, "id">) {
-  return axios.post(API_URL, sessao);
-}
+export const criarSessao = (sessao: Omit<Sessao, "id">) =>
+  axios.post(API_URL, sessao);
 
-export function atualizarSessao(id: string, sessao: Omit<Sessao, "id">) {
-  return axios.put(`${API_URL}/${id}`, sessao);
-}
+export const atualizarSessao = (id: string, sessao: Omit<Sessao, "id">) =>
+  axios.put(`${API_URL}/${id}`, sessao);
 
-export function deletarSessao(id: string) {
-  return axios.delete(`${API_URL}/${id}`);
-}
+export const deletarSessao = (id: string) =>
+  axios.delete(`${API_URL}/${id}`);

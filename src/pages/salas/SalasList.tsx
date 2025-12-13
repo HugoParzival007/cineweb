@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listarSalas } from "../../services/sala.service";
+import { listarSalas, excluirSala } from "../../services/sala.service";
 import type { Sala } from "../../models/Sala";
 import { Link } from "react-router-dom";
 
@@ -11,6 +11,14 @@ export default function SalasList() {
     setSalas(resposta.data);
   }
 
+  async function handleExcluir(id: string) {
+    const ok = confirm("Tem certeza que deseja excluir esta sala?");
+    if (!ok) return;
+
+    await excluirSala(id);
+    carregar();
+  }
+
   useEffect(() => {
     carregar();
   }, []);
@@ -20,7 +28,6 @@ export default function SalasList() {
       <div className="d-flex justify-content-between">
         <h2>Salas</h2>
 
-        {/* Botão ADICIONADO */}
         <Link to="/salas/nova" className="btn btn-success">
           Nova Sala
         </Link>
@@ -31,6 +38,7 @@ export default function SalasList() {
           <tr>
             <th>Número</th>
             <th>Capacidade</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -38,6 +46,21 @@ export default function SalasList() {
             <tr key={s.id}>
               <td>{s.numero}</td>
               <td>{s.capacidade}</td>
+              <td>
+                <Link
+                  className="btn btn-primary btn-sm me-2"
+                  to={`/salas/editar/${s.id}`}
+                >
+                  Editar
+                </Link>
+
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleExcluir(s.id)}
+                >
+                  Excluir
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

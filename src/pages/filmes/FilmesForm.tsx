@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { criarFilme } from "../../services/filme.service";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { criarFilme, obterFilme, atualizarFilme } from "../../services/filme.service";
 import { z } from "zod";
 
 const filmeSchema = z.object({
@@ -15,11 +15,11 @@ const filmeSchema = z.object({
   dataFim: z.string().min(1, "Data de fim é obrigatória"),
 });
 
-
 type ErrosForm = Record<string, string>;
 
 export default function FilmesForm() {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [form, setForm] = useState({
     titulo: "",
@@ -32,6 +32,25 @@ export default function FilmesForm() {
   });
 
   const [erros, setErros] = useState<ErrosForm>({});
+
+  async function carregarFilme() {
+    if (!id) return;
+    const resp = await obterFilme(id);
+    const f = resp.data;
+    setForm({
+      titulo: f.titulo,
+      sinopse: f.sinopse,
+      classificacao: f.classificacao,
+      duracao: String(f.duracao),
+      genero: f.genero,
+      dataInicio: f.dataInicio,
+      dataFim: f.dataFim,
+    });
+  }
+
+  useEffect(() => {
+    carregarFilme();
+  }, [id]);
 
   function atualizar(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -55,13 +74,18 @@ export default function FilmesForm() {
       return;
     }
 
-    await criarFilme(validacao.data);
+    if (id) {
+      await atualizarFilme(id, validacao.data);
+    } else {
+      await criarFilme(validacao.data);
+    }
+
     navigate("/filmes");
   }
 
   return (
     <div className="card p-4">
-      <h2>Novo Filme</h2>
+      <h2>{id ? "Editar Filme" : "Novo Filme"}</h2>
 
       <form onSubmit={salvar}>
         <div className="mb-3">
@@ -69,6 +93,7 @@ export default function FilmesForm() {
           <input
             name="titulo"
             className={`form-control ${erros.titulo ? "is-invalid" : ""}`}
+            value={form.titulo}
             onChange={atualizar}
           />
           {erros.titulo && (
@@ -81,6 +106,7 @@ export default function FilmesForm() {
           <textarea
             name="sinopse"
             className={`form-control ${erros.sinopse ? "is-invalid" : ""}`}
+            value={form.sinopse}
             onChange={atualizar}
             rows={3}
           />
@@ -97,6 +123,7 @@ export default function FilmesForm() {
               className={`form-control ${
                 erros.classificacao ? "is-invalid" : ""
               }`}
+              value={form.classificacao}
               onChange={atualizar}
             />
             {erros.classificacao && (
@@ -109,6 +136,7 @@ export default function FilmesForm() {
             <input
               name="genero"
               className={`form-control ${erros.genero ? "is-invalid" : ""}`}
+              value={form.genero}
               onChange={atualizar}
             />
             {erros.genero && (
@@ -122,6 +150,7 @@ export default function FilmesForm() {
               type="number"
               name="duracao"
               className={`form-control ${erros.duracao ? "is-invalid" : ""}`}
+              value={form.duracao}
               onChange={atualizar}
             />
             {erros.duracao && (
@@ -139,6 +168,7 @@ export default function FilmesForm() {
               className={`form-control ${
                 erros.dataInicio ? "is-invalid" : ""
               }`}
+              value={form.dataInicio}
               onChange={atualizar}
             />
             {erros.dataInicio && (
@@ -152,6 +182,7 @@ export default function FilmesForm() {
               type="date"
               name="dataFim"
               className={`form-control ${erros.dataFim ? "is-invalid" : ""}`}
+              value={form.dataFim}
               onChange={atualizar}
             />
             {erros.dataFim && (

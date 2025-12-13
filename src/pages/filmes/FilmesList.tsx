@@ -12,6 +12,9 @@ export default function FilmesList() {
   }
 
   async function handleExcluir(id: string) {
+    const ok = confirm("Tem certeza que deseja excluir este filme?");
+    if (!ok) return;
+
     await excluirFilme(id);
     carregar();
   }
@@ -24,9 +27,7 @@ export default function FilmesList() {
     <div className="container mt-4">
       <div className="d-flex justify-content-between">
         <h2>Filmes</h2>
-        <Link to="/filmes/novo" className="btn btn-success">
-          Novo Filme
-        </Link>
+        <Link to="/filmes/novo" className="btn btn-success">Novo Filme</Link>
       </div>
 
       <table className="table mt-3">
@@ -35,7 +36,7 @@ export default function FilmesList() {
             <th>Título</th>
             <th>Gênero</th>
             <th>Duração</th>
-            <th></th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -45,6 +46,13 @@ export default function FilmesList() {
               <td>{f.genero}</td>
               <td>{f.duracao} min</td>
               <td>
+                <Link
+                  className="btn btn-primary btn-sm me-2"
+                  to={`/filmes/editar/${f.id}`}
+                >
+                  Editar
+                </Link>
+
                 <button
                   className="btn btn-danger btn-sm"
                   onClick={() => handleExcluir(f.id)}

@@ -20,19 +20,38 @@ export default function VendaIngresso() {
 
   const [tipo, setTipo] = useState("");
   const [erro, setErro] = useState("");
+  const [erroCarregamento, setErroCarregamento] = useState("");
 
   async function carregar() {
-    if (!id) return;
+    try {
+      if (!id) {
+        setErroCarregamento("Sessão não encontrada.");
+        return;
+      }
 
-    const sRes = await obterSessao(id);
-    const s = sRes.data;
-    setSessao(s);
+      const sRes = await obterSessao(id);
+      const s = sRes.data;
+      setSessao(s);
 
-    const filmes = await listarFilmes();
-    setFilme(filmes.data.find((f) => f.id === s.filmeId) ?? null);
+      const [fRes, saRes] = await Promise.all([listarFilmes(), listarSalas()]);
 
-    const salas = await listarSalas();
-    setSala(salas.data.find((sa) => sa.id === s.salaId) ?? null);
+      const filmeEncontrado =
+        fRes.data.find((f) => String(f.id) === String(s.filmeId)) ?? null;
+      const salaEncontrada =
+        saRes.data.find((x) => String(x.id) === String(s.salaId)) ?? null;
+
+      setFilme(filmeEncontrado);
+      setSala(salaEncontrada);
+
+      if (!filmeEncontrado || !salaEncontrada) {
+        setErroCarregamento(
+          "Não foi possível localizar o filme ou a sala dessa sessão."
+        );
+      }
+    } catch (e) {
+      console.error(e);
+      setErroCarregamento("Erro ao carregar dados da sessão.");
+    }
   }
 
   useEffect(() => {
@@ -42,6 +61,8 @@ export default function VendaIngresso() {
   async function vender(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!sessao || !id) return;
+
     if (!tipo) {
       setErro("Escolha o tipo de ingresso");
       return;
@@ -50,7 +71,7 @@ export default function VendaIngresso() {
     const valor = tipo === "inteira" ? 20 : 10;
 
     await criarIngresso({
-      sessaoId: id!,
+      sessaoId: id,
       tipo: tipo as "inteira" | "meia",
       valor,
     });
@@ -58,18 +79,41 @@ export default function VendaIngresso() {
     navigate("/sessoes");
   }
 
-  if (!sessao || !filme || !sala) return <p>Carregando...</p>;
+  if (erroCarregamento) {
+    return (
+      <div className="card p-4 shadow">
+        <h2>Venda de Ingresso</h2>
+        <p className="text-danger">{erroCarregamento}</p>
+      </div>
+    );
+  }
+
+  if (!sessao || !filme || !sala) {
+    return (
+      <div className="text-center mt-4">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="card p-4 shadow">
       <h2>Venda de Ingresso</h2>
 
-      <p><strong>Filme:</strong> {filme.titulo}</p>
-      <p><strong>Sala:</strong> {sala.numero}</p>
-      <p><strong>Horário:</strong> {new Date(sessao.horario).toLocaleString("pt-BR")}</p>
+      <p>
+        <strong>Filme:</strong> {filme.titulo}
+      </p>
+      <p>
+        <strong>Sala:</strong> {sala.numero}
+      </p>
+      <p>
+        <strong>Horário:</strong>{" "}
+        {new Date(sessao.horario).toLocaleString("pt-BR")}
+      </p>
 
       <form onSubmit={vender}>
         <label className="form-label">Tipo</label>
+
         <select
           className={`form-select ${erro ? "is-invalid" : ""}`}
           value={tipo}
@@ -79,8 +123,8 @@ export default function VendaIngresso() {
           }}
         >
           <option value="">Selecione...</option>
-          <option value="inteira">Inteira — R$ 20</option>
-          <option value="meia">Meia — R$ 10</option>
+          <option value="inteira">Inteira — R$ 20,00</option>
+          <option value="meia">Meia — R$ 10,00</option>
         </select>
 
         {erro && <div className="invalid-feedback">{erro}</div>}

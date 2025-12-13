@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { criarSala } from "../../services/sala.service";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { criarSala, obterSala, atualizarSala } from "../../services/sala.service";
 import { z } from "zod";
 
 const salaSchema = z.object({
@@ -13,11 +13,11 @@ const salaSchema = z.object({
     .refine((v) => !isNaN(v) && v > 0, "Capacidade deve ser um número maior que 0"),
 });
 
-
 type ErrosForm = Record<string, string>;
 
 export default function SalasForm() {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [form, setForm] = useState({
     numero: "",
@@ -25,6 +25,20 @@ export default function SalasForm() {
   });
 
   const [erros, setErros] = useState<ErrosForm>({});
+
+  async function carregarSala() {
+    if (!id) return;
+    const resp = await obterSala(id);
+    const s = resp.data;
+    setForm({
+      numero: String(s.numero),
+      capacidade: String(s.capacidade),
+    });
+  }
+
+  useEffect(() => {
+    carregarSala();
+  }, [id]);
 
   function atualizar(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -48,13 +62,18 @@ export default function SalasForm() {
       return;
     }
 
-    await criarSala(validacao.data);
+    if (id) {
+      await atualizarSala(id, validacao.data);
+    } else {
+      await criarSala(validacao.data);
+    }
+
     navigate("/salas");
   }
 
   return (
     <div className="card p-4">
-      <h2>Cadastrar Sala</h2>
+      <h2>{id ? "Editar Sala" : "Cadastrar Sala"}</h2>
 
       <form onSubmit={salvar}>
         <div className="mb-3">
@@ -63,6 +82,7 @@ export default function SalasForm() {
             type="number"
             name="numero"
             className={`form-control ${erros.numero ? "is-invalid" : ""}`}
+            value={form.numero}
             onChange={atualizar}
           />
           {erros.numero && (
@@ -78,6 +98,7 @@ export default function SalasForm() {
             className={`form-control ${
               erros.capacidade ? "is-invalid" : ""
             }`}
+            value={form.capacidade}
             onChange={atualizar}
           />
           {erros.capacidade && (

@@ -1,26 +1,58 @@
+import { useEffect, useState } from "react";
+import { listarFilmes } from "../../services/filme.service";
+import { listarSalas } from "../../services/sala.service";
+import { listarSessoes } from "../../services/sessao.service";
 import { Link } from "react-router-dom";
 
 export default function Home() {
+  const [filmes, setFilmes] = useState(0);
+  const [salas, setSalas] = useState(0);
+  const [sessoes, setSessoes] = useState(0);
+
+  async function carregarDados() {
+    const [f, s, se] = await Promise.all([
+      listarFilmes(),
+      listarSalas(),
+      listarSessoes()
+    ]);
+
+    setFilmes(f.data.length);
+    setSalas(s.data.length);
+    setSessoes(se.data.length);
+  }
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
   return (
-    <div className="text-center mt-5">
-      <h1 className="fw-bold">🎬 Bem-vindo ao CineWeb</h1>
-      <p className="fs-4 text-secondary">
-        Sistema administrativo para cadastro de filmes, salas, sessões e venda de ingressos.
-      </p>
+    <div className="cw-dashboard">
 
-      <div className="d-flex justify-content-center gap-4 mt-4 flex-wrap">
-        <Link to="/filmes" className="btn btn-dark btn-lg px-4 shadow">
-          <i className="bi bi-film"></i> Gerenciar Filmes
-        </Link>
+      <h1 className="cw-title">🎬 CineWeb Dashboard</h1>
+      <p className="cw-subtitle">Painel administrativo geral</p>
 
-        <Link to="/salas" className="btn btn-dark btn-lg px-4 shadow">
-          <i className="bi bi-door-open"></i> Gerenciar Salas
-        </Link>
+      <div className="cw-dashboard-cards">
 
-        <Link to="/sessoes" className="btn btn-dark btn-lg px-4 shadow">
-          <i className="bi bi-ticket-perforated"></i> Gerenciar Sessões
-        </Link>
+        <div className="cw-card">
+          <h2>{filmes}</h2>
+          <p>Filmes cadastrados</p>
+          <Link to="/filmes" className="cw-btn">Gerenciar Filmes</Link>
+        </div>
+
+        <div className="cw-card">
+          <h2>{salas}</h2>
+          <p>Salas cadastradas</p>
+          <Link to="/salas" className="cw-btn">Gerenciar Salas</Link>
+        </div>
+
+        <div className="cw-card">
+          <h2>{sessoes}</h2>
+          <p>Sessões ativas</p>
+          <Link to="/sessoes" className="cw-btn">Gerenciar Sessões</Link>
+        </div>
+
       </div>
+
     </div>
   );
 }

@@ -30,11 +30,19 @@ export default function SessoesList() {
   }, []);
 
   function nomeFilme(id: string) {
-    return filmes.find((f) => f.id === id)?.titulo ?? "Desconhecido";
+    return filmes.find((f) => String(f.id) === String(id))?.titulo ?? "Desconhecido";
   }
 
   function numeroSala(id: string) {
-    return salas.find((s) => s.id === id)?.numero ?? "N/A";
+    return salas.find((s) => String(s.id) === String(id))?.numero ?? "N/A";
+  }
+
+  async function handleExcluir(id: string) {
+    const ok = confirm("Tem certeza que deseja excluir esta sessão?");
+    if (!ok) return;
+
+    await deletarSessao(id);
+    carregar();
   }
 
   return (
@@ -52,7 +60,7 @@ export default function SessoesList() {
             <th>Filme</th>
             <th>Sala</th>
             <th>Horário</th>
-            <th></th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -64,6 +72,13 @@ export default function SessoesList() {
               <td>
                 <Link
                   className="btn btn-primary btn-sm me-2"
+                  to={`/sessoes/${s.id}/editar`}
+                >
+                  Editar
+                </Link>
+
+                <Link
+                  className="btn btn-info btn-sm me-2"
                   to={`/sessoes/${s.id}/vender`}
                 >
                   Vender
@@ -71,7 +86,7 @@ export default function SessoesList() {
 
                 <button
                   className="btn btn-danger btn-sm"
-                  onClick={() => deletarSessao(s.id).then(carregar)}
+                  onClick={() => handleExcluir(s.id)}
                 >
                   Excluir
                 </button>
