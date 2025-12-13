@@ -5,10 +5,12 @@ import { obterSessao } from "../../services/sessao.service";
 import { listarFilmes } from "../../services/filme.service";
 import { listarSalas } from "../../services/sala.service";
 import { criarIngresso } from "../../services/ingresso.service";
+import { criarPedido } from "../../services/pedido.service";
 
 import type { Sessao } from "../../models/Sessao";
 import type { Filme } from "../../models/Filme";
 import type { Sala } from "../../models/Sala";
+import type { Ingresso } from "../../models/Ingresso";
 
 export default function VendaIngresso() {
   const { id } = useParams();
@@ -56,6 +58,7 @@ export default function VendaIngresso() {
 
   useEffect(() => {
     carregar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function vender(e: React.FormEvent) {
@@ -70,10 +73,21 @@ export default function VendaIngresso() {
 
     const valor = tipo === "inteira" ? 20 : 10;
 
-    await criarIngresso({
+    // 1) Cria o ingresso
+    const ingressoRes = await criarIngresso({
       sessaoId: id,
       tipo: tipo as "inteira" | "meia",
       valor,
+    });
+
+    const novoIngresso: Ingresso = ingressoRes.data;
+
+    // 2) Cria o pedido (um ingresso, nenhum lanche por enquanto)
+    await criarPedido({
+      qtInteira: tipo === "inteira" ? 1 : 0,
+      qtMeia: tipo === "meia" ? 1 : 0,
+      ingressos: [novoIngresso],
+      lanches: [], // depois podemos popular com combos
     });
 
     navigate("/sessoes");
@@ -81,7 +95,7 @@ export default function VendaIngresso() {
 
   if (erroCarregamento) {
     return (
-      <div className="card p-4 shadow">
+      <div className="card p-4 shadow cw-container mt-4">
         <h2>Venda de Ingresso</h2>
         <p className="text-danger">{erroCarregamento}</p>
       </div>
@@ -90,47 +104,49 @@ export default function VendaIngresso() {
 
   if (!sessao || !filme || !sala) {
     return (
-      <div className="text-center mt-4">
+      <div className="cw-container mt-4 text-center">
         <p>Carregando...</p>
       </div>
     );
   }
 
   return (
-    <div className="card p-4 shadow">
-      <h2>Venda de Ingresso</h2>
+    <div className="cw-container mt-4">
+      <div className="card p-4 shadow">
+        <h2 className="mb-3">Venda de Ingresso</h2>
 
-      <p>
-        <strong>Filme:</strong> {filme.titulo}
-      </p>
-      <p>
-        <strong>Sala:</strong> {sala.numero}
-      </p>
-      <p>
-        <strong>Horário:</strong>{" "}
-        {new Date(sessao.horario).toLocaleString("pt-BR")}
-      </p>
+        <p>
+          <strong>Filme:</strong> {filme.titulo}
+        </p>
+        <p>
+          <strong>Sala:</strong> {sala.numero}
+        </p>
+        <p>
+          <strong>Horário:</strong>{" "}
+          {new Date(sessao.horario).toLocaleString("pt-BR")}
+        </p>
 
-      <form onSubmit={vender}>
-        <label className="form-label">Tipo</label>
+        <form onSubmit={vender} className="mt-3">
+          <label className="form-label">Tipo de ingresso</label>
 
-        <select
-          className={`form-select ${erro ? "is-invalid" : ""}`}
-          value={tipo}
-          onChange={(e) => {
-            setTipo(e.target.value);
-            setErro("");
-          }}
-        >
-          <option value="">Selecione...</option>
-          <option value="inteira">Inteira — R$ 20,00</option>
-          <option value="meia">Meia — R$ 10,00</option>
-        </select>
+          <select
+            className={`form-select ${erro ? "is-invalid" : ""}`}
+            value={tipo}
+            onChange={(e) => {
+              setTipo(e.target.value);
+              setErro("");
+            }}
+          >
+            <option value="">Selecione...</option>
+            <option value="inteira">Inteira — R$ 20,00</option>
+            <option value="meia">Meia — R$ 10,00</option>
+          </select>
 
-        {erro && <div className="invalid-feedback">{erro}</div>}
+          {erro && <div className="invalid-feedback">{erro}</div>}
 
-        <button className="btn btn-success mt-3">Confirmar</button>
-      </form>
+          <button className="btn btn-success mt-3">Confirmar venda</button>
+        </form>
+      </div>
     </div>
   );
 }

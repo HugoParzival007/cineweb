@@ -1,37 +1,7 @@
 {
-  "filmes": [
-    {
-      "titulo": "Matrix 2",
-      "sinopse": "johgfuhwuorhfguoiwdhuowf",
-      "classificacao": "+18",
-      "duracao": 120,
-      "genero": "Ação",
-      "dataInicio": "2025-12-04",
-      "dataFim": "2025-12-23",
-      "id": 1
-    }
-  ],
-  "salas": [
-    {
-      "numero": 1,
-      "capacidade": 200,
-      "id": 1
-    }
-  ],
-  "sessoes": [
-    {
-      "filmeId": "1",
-      "salaId": "1",
-      "horario": "2025-12-08T19:00",
-      "id": 1
-    }
-  ],
-  "ingressos": [
-    {
-      "sessaoId": "1",
-      "tipo": "inteira",
-      "valor": 20,
-      "id": 1
-    }
-  ]
+  "filmes": [],
+  "salas": [],
+  "sessoes": [],
+  "ingressos": [],
+  "pedidos": []
 }
